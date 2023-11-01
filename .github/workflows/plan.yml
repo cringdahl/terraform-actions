@@ -1,5 +1,8 @@
 name: terraform-actions
-on: workflow_dispatch # later this will be a cron
+on: 
+  workflow_dispatch:
+  pull_request:
+
 permissions:
   pull-requests: write
 jobs:

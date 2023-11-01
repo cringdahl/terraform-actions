@@ -32,7 +32,7 @@ jobs:
         continue-on-error: true
       
       - uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'push'
         env:
           APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:

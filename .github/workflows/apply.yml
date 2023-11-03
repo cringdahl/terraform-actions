@@ -60,6 +60,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const relatedPR = await github.rest.search.issuesAndPullRequests({
+              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
+            });
+            
+            console.log(relatedPR)
+            console.log(context)
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
@@ -83,10 +89,6 @@ jobs:
       
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
             
-            const relatedPR = await github.rest.search.issuesAndPullRequests({
-              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
-            });
-
             github.rest.issues.createComment({
               issue_number: relatedPR.data.items.number,
               owner: context.repo.owner,

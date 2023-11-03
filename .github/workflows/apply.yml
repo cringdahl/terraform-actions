@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '*.tf'
+      - '**/*.tf'
   
 permissions:
   pull-requests: write
@@ -15,9 +18,22 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+
       - uses: actions/checkout@v3
+
+      - name: Grab PR number (when applicable)
+        uses: octokit/request-action@v2.1.9
+        if: github.event_name == 'push'
+        id: get_related_pr
+        with:
+          route: GET /search/issues/?q={sha}+repo:{repository}+is:pr+is:merged
+          repository: ${{ github.repository }} 
+          sha: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: hashicorp/setup-terraform@v3
-      - name: Terraform fmt
+      - name: Terraform fmt check
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
@@ -33,7 +49,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -no-color
-        continue-on-error: true
+        continue-on-error: true # we want to write failures to PRs as well
       
       - uses: actions/github-script@v6
         if: github.event_name == 'push'
@@ -66,7 +82,7 @@ jobs:
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
       
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
+              issue_number: ${{ fromJson(steps.get_related_pr.outputs.data).number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output

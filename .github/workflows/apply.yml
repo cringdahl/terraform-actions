@@ -30,7 +30,7 @@ jobs:
       #     repository: ${{ github.repository }} 
       #     sha: ${{ github.sha }}
       #     is-pr: is:pr
-      #     is-merged: is:merged
+      #     is-merged: is:merged 
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

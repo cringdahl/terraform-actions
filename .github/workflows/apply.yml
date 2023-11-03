@@ -64,8 +64,7 @@ jobs:
               q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
             });
             
-            console.log(relatedPR)
-            console.log(context)
+            console.log(relatedPR.data.items.number)
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`

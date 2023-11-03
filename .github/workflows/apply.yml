@@ -42,7 +42,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.search.issuesAndPullRequests({
-              q: ${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged
+              ${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged
             });
 
       - uses: hashicorp/setup-terraform@v3

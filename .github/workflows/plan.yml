@@ -1,8 +1,9 @@
 name: terraform-actions
 on: 
-  workflow_dispatch:
   pull_request:
-
+    paths:
+      - '*.tf'
+      - '**/*.tf'
 permissions:
   pull-requests: write
 jobs:

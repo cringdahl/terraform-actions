@@ -26,9 +26,10 @@ jobs:
         if: github.event_name == 'push'
         id: get_related_pr
         with:
-          route: GET /search/issues/?q={sha}+repo:{repository}+is:pr+is:merged
+          route: GET /search/issues/?q={sha}+repo:{repository}+{conditions}
           repository: ${{ github.repository }} 
           sha: ${{ github.sha }}
+          conditions: "is:pr+is:merged"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -14,11 +14,6 @@ jobs:
   terraform-apply:
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - uses: actions/checkout@v3
 
       # - name: Grab PR number (when applicable)
@@ -35,7 +30,7 @@ jobs:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: hashicorp/setup-terraform@v3
-      - name: Terraform fmt check
+      - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
@@ -53,7 +48,8 @@ jobs:
         run: terraform apply -auto-approve -no-color
         continue-on-error: true # we want to write failures to PRs as well
       
-      - uses: actions/github-script@v6
+      - name: Write Report to PR Comment
+        uses: actions/github-script@v6
         if: github.event_name == 'push'
         env:
           APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
@@ -64,7 +60,6 @@ jobs:
               q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
             });
             
-            console.log(relatedPR.data.items[0].number)
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
@@ -94,3 +89,8 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
+            await core.summary
+            .addRaw('See results at ')
+            .addLink('this PR.', relatedPR.data.items[0].html_url)
+            .write()

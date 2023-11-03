@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '*.tf'
-      - '**/*.tf'
+    # paths:
+    #   - '*.tf'
+    #   - '**/*.tf'
   
 permissions:
   pull-requests: write
@@ -26,10 +26,11 @@ jobs:
         if: github.event_name == 'push'
         id: get_related_pr
         with:
-          route: GET /search/issues/?q={sha}+repo:{repository}+{conditions}
+          route: GET /search/issues/?q={sha}+repo:{repository}+{is-pr}+{is-merged}
           repository: ${{ github.repository }} 
           sha: ${{ github.sha }}
-          conditions: "'is:pr+is:merged'"
+          is-pr: is:pr
+          is-merged: is:merged
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    # paths:
-    #   - '*.tf'
-    #   - '**/*.tf'
+    paths:
+      - '*.tf'
+      - '**/*.tf'
   
 permissions:
   pull-requests: write
@@ -15,20 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      # - name: Grab PR number (when applicable)
-      #   uses: octokit/request-action@v2.1.9
-      #   if: github.event_name == 'push'
-      #   id: get_related_pr
-      #   with:
-      #     route: GET /search/issues/?q={sha}+repo:{repository}+is:{is-pr}+is:{is-merged}
-      #     repository: ${{ github.repository }} 
-      #     sha: ${{ github.sha }}
-      #     is-pr: is:pr
-      #     is-merged: is:merged
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform Format Check
         id: fmt

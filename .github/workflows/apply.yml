@@ -44,7 +44,7 @@ jobs:
             const shaPR = await github.rest.search.issuesAndPullRequests({
               q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
             });
-            console.log(shaPR)
+            console.log(shaPR.data)
       - name: Debug PR return
         env:
           OUTPUT: ${{ fromJson(steps.get_related_pr.outputs.result) }}

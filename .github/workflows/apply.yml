@@ -34,20 +34,6 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Grab PR number (when applicable)
-        uses: actions/github-script@v6
-        if: github.event_name == 'push'
-        id: get_related_pr
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.search.issuesAndPullRequests({
-              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
-            });
-      - name: Debug PR return
-        env:
-          OUTPUT: ${{ steps.get_related_pr.outputs.result.items.number }}
-        run: "echo $OUTPUT"
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform fmt check
         id: fmt
@@ -96,9 +82,13 @@ jobs:
             </details>
       
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-      
+            
+            const relatedPR = await github.rest.search.issuesAndPullRequests({
+              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
+            });
+
             github.rest.issues.createComment({
-              issue_number: ${{ fromJson(steps.get_related_pr.outputs.result).number }},
+              issue_number: relatedPR.data.items.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output

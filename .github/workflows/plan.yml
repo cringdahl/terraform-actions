@@ -1,4 +1,4 @@
-name: terraform-actions
+name: terraform-plan
 on: 
   pull_request:
     paths:

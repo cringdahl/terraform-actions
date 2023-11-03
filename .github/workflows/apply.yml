@@ -26,7 +26,8 @@ jobs:
         id: get_related_pr
         run: | 
           curl --url \
-          'https://api.github.com/search/issues/?q=${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged'
+          'https://api.github.com/search/issues/?q=${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged' \
+          --header 'Authorization: token ${{ secrets.GITHUB_TOKEN }}'
 
       # - name: Grab PR number (when applicable)
       #   uses: octokit/request-action@v2.1.9

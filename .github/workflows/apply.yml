@@ -41,7 +41,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const shaPullRequest = await github.rest.search.issuesAndPullRequests({
+            github.rest.search.issuesAndPullRequests({
               q=${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged
             });
 
@@ -95,7 +95,7 @@ jobs:
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
       
             github.rest.issues.createComment({
-              issue_number: ${{ fromJson(steps.get_related_pr.outputs.data).number }},
+              issue_number: ${{ fromJson(steps.get_related_pr.outputs.result).number }},
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output

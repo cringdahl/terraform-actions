@@ -46,7 +46,7 @@ jobs:
             });
       - name: Debug PR return
         env:
-          OUTPUT: ${{ steps.get_related_pr.outputs.data.items.number }}
+          OUTPUT: ${{ steps.get_related_pr.outputs.result.items.number }}
         run: "echo $OUTPUT"
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform fmt check

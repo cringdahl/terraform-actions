@@ -13,6 +13,9 @@ resource "aws_iam_policy" "s3" {
             "iam:GetRole",
             "iam:GetPolicy",
             "iam:GetOpenIDConnectProvider",
+            "iam:GetPolicyVersion",
+            "iam:ListRolePolicies",
+            "iam:ListAttachedRolePolicies"
           ]
           Effect   = "Allow"
           Resource = "*"
@@ -55,9 +58,9 @@ data "aws_iam_policy_document" "oidc" {
 }
 
 resource "aws_iam_role" "oidc" {
-  name               = "githubActionsAccessS3TerraformState"
-  assume_role_policy = data.aws_iam_policy_document.oidc.json
-  description        = "For use with OIDC Github integration"
+  name                 = "githubActionsAccessS3TerraformState"
+  assume_role_policy   = data.aws_iam_policy_document.oidc.json
+  description          = "For use with OIDC Github integration"
   managed_policy_arns  = [aws_iam_policy.s3.arn]
   max_session_duration = 3600
 }

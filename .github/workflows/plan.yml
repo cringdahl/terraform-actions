@@ -12,10 +12,11 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      - name: Configure AWS Credentials Action for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::169421194568:role/githubActionsAccessS3TerraformState
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
       

@@ -58,3 +58,8 @@ resource "aws_iam_role" "oidc" {
   managed_policy_arns  = [aws_iam_policy.s3.arn]
   max_session_duration = 3600
 }
+
+output oidc_arn {
+  value       = aws_iam_role.oidc.arn
+  description = "Role ARN for use with AWS Credentials Action"
+}

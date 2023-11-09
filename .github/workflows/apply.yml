@@ -7,14 +7,23 @@ on:
     paths:
       - '*.tf'
       - '**/*.tf'
-  
+
 permissions:
   pull-requests: write
+  id-token: write
+  contents: read
 jobs:
   terraform-apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials Action for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::169421194568:role/githubActionsAccessS3TerraformState
+  
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform Format Check
         id: fmt

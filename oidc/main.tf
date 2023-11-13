@@ -1,5 +1,5 @@
 resource "aws_iam_policy" "s3" {
-  description = "Minimal required permissions to use Terraform state files and OIDC policy"
+  description = "Minimal required permissions to use Terraform state files"
   name        = "s3TerraformState"
   policy = jsonencode(
     {
@@ -27,6 +27,30 @@ resource "aws_iam_policy" "s3" {
   )
 }
 
+resource "aws_iam_policy" "oidc" {
+  description = "Minimal required permissions for OIDC policy"
+  name        = "OIDCPolicy"
+  policy = jsonencode(
+    {
+      Statement = [
+        {
+          Action = [
+            "iam:GetRole",
+            "iam:GetPolicy",
+            "iam:GetOpenIDConnectProvider",
+            "iam:GetPolicyVersion",
+            "iam:ListRolePolicies",
+            "iam:ListAttachedRolePolicies"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+          Sid      = "VisualEditor0"
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+}
 
 resource "aws_iam_openid_connect_provider" "default" {
   client_id_list  = ["sts.amazonaws.com"]
@@ -61,8 +85,17 @@ resource "aws_iam_role" "oidc" {
   name                 = "githubActionsAccessS3TerraformState"
   assume_role_policy   = data.aws_iam_policy_document.oidc.json
   description          = "For use with OIDC Github integration"
-  managed_policy_arns  = [aws_iam_policy.s3.arn]
   max_session_duration = 3600
+}
+
+resource "aws_iam_role_policy_attachment" "oidc-policy-attach" {
+  role       = aws_iam_role.oidc.name
+  policy_arn = aws_iam_policy.oidc.arn
+}
+
+resource "aws_iam_role_policy_attachment" "s3-policy-attach" {
+  role       = aws_iam_role.oidc.name
+  policy_arn = aws_iam_policy.s3.arn
 }
 
 output "oidc_arn" {

@@ -16,7 +16,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
           aws-region: us-east-2
-          role-to-assume: arn:aws:iam::169421194568:role/githubActionsAccessS3TerraformState
+          role-to-assume: arn:aws:iam::169421194568:role/githubOIDCAssumeRole
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
       

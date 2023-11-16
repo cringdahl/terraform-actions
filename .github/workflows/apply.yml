@@ -41,11 +41,10 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -no-color
-        continue-on-error: true # we want to write failures to PRs as well
       
       - name: Write Report to PR Comment
         uses: actions/github-script@v6
-        if: github.event_name == 'push'
+        if: always() && github.event_name == 'push'
         continue-on-error: true # if writing fails for some reason, don't mark as failure
         env:
           APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"

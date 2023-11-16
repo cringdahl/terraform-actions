@@ -1,6 +1,10 @@
 # oidc
 
-Here lies the OIDC configs. They are run on workstation, because you can only automate so much.
+Here lies the OIDC configs. They are intended to be run on a workstation, because you can only automate so much.
+
+## Why OIDC?
+
+You won't need stored static AWS repo secrets anymore.
 
 ## What is OIDC, and how does this help me do it?
 

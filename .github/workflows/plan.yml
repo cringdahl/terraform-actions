@@ -6,12 +6,12 @@ on:
       - '*.tf'
       - '**/*.tf'
 
-# permissions:
-#   pull-requests: write
-#   id-token: write
-#   contents: read
+permissions:
+  pull-requests: write
+  id-token: write
+  contents: read
 jobs:
-  terraform-apply:
+  terraform-plan:
     uses: ./.github/workflows/reusable_plan.yml
     with:
       oidc-role-arn: arn:aws:iam::169421194568:role/githubOIDCAssumeRole

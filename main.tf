@@ -8,4 +8,4 @@ resource "null_resource" "thing-three" {
 }
 
 resource "null_resource" "thing-three" {
-}
+} 

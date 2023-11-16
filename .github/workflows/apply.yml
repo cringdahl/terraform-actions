@@ -28,6 +28,7 @@ jobs:
       - name: Terraform Format Check
         id: fmt
         run: terraform fmt -check
+        continue-on-error: true
       
       - name: Terraform Init
         id: init

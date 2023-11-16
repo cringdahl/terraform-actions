@@ -1,0 +1,91 @@
+name: terraform-apply
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '*.tf'
+      - '**/*.tf'
+
+permissions:
+  pull-requests: write
+  id-token: write
+  contents: read
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials Action for GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::169421194568:role/githubOIDCAssumeRole
+  
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+      
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -no-color
+      
+      - name: Write Report to PR Comment
+        uses: actions/github-script@v6
+        if: always() && github.event_name == 'push'
+        continue-on-error: true # if writing fails for some reason, don't mark as failure
+        env:
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const relatedPR = await github.rest.search.issuesAndPullRequests({
+              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
+            });
+            
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+      
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+      
+            </details>
+      
+            #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
+      
+            <details><summary>Show Apply</summary>
+      
+            \`\`\`\n
+            ${process.env.APPLY}
+            \`\`\`
+      
+            </details>
+      
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            
+            github.rest.issues.createComment({
+              issue_number: relatedPR.data.items[0].number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+            await core.summary
+            .addRaw('See results at ')
+            .addLink('this PR.', relatedPR.data.items[0].html_url)
+            .write()

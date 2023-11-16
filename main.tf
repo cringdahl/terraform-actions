@@ -7,5 +7,5 @@ resource "null_resource" "thing-two" {
 resource "null_resource" "thing-three" {
 }
 
-resource "null_resource" "thing-four" {
-}
+resource "null_resource" "thing-three" {
+} 

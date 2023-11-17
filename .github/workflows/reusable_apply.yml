@@ -9,6 +9,9 @@ on:
         required: true
         type: string
         default: 'us-east-2'
+      apply-flags:
+        required: false
+        type: string
 
 jobs:
   terraform-apply-actual:
@@ -38,7 +41,7 @@ jobs:
       
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve -no-color
+        run: terraform apply ${{ inputs.apply-flags }} -auto-approve -no-color
       
       - name: Write Report to PR Comment
         uses: actions/github-script@v6

@@ -9,6 +9,9 @@ on:
         required: true
         type: string
         default: 'us-east-2'
+      plan-flags:
+        required: false
+        type: string
 
 jobs:
   terraform-plan:
@@ -37,7 +40,7 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color ${{ inputs.plan-flags }}
       
       - uses: actions/github-script@v6
         if: always() && github.event_name == 'pull_request'

@@ -17,3 +17,4 @@ jobs:
     uses: ./.github/workflows/reusable_apply.yml
     with:
       oidc-role-arn: arn:aws:iam::169421194568:role/githubOIDCAssumeRole
+      aws-region: us-east-2

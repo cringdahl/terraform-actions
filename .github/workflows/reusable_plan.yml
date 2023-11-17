@@ -1,4 +1,4 @@
-name: terraform-apply
+name: terraform-plan
 on: 
   workflow_call:
     inputs:
@@ -9,28 +9,27 @@ on:
         required: true
         type: string
         default: 'us-east-2'
-      apply-flags:
+      plan-flags:
         required: false
         type: string
 
 jobs:
-  terraform-apply-actual:
+  terraform-plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
       - name: Configure AWS Credentials Action for GitHub Actions
         uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
           aws-region: ${{ inputs.aws-region }}
           role-to-assume: ${{ inputs.oidc-role-arn }}
-  
+      - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
-      - name: Terraform Format Check
+      
+      - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
-      
+
       - name: Terraform Init
         id: init
         run: terraform init
@@ -39,24 +38,18 @@ jobs:
         id: validate
         run: terraform validate -no-color
       
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply ${{ inputs.apply-flags }} -auto-approve -no-color
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color ${{ inputs.plan-flags }}
       
-      - name: Write Report to PR Comment
-        uses: actions/github-script@v6
-        if: always() && github.event_name == 'push'
-          # if the terraform jobs pass or fail, and we're a push (to main),
-          # then write to PR
+      - uses: actions/github-script@v6
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true # if writing fails for some reason, don't mark as failure
         env:
-          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const relatedPR = await github.rest.search.issuesAndPullRequests({
-              q: "${{ github.sha }}+repo:${{ github.repository }}+is:pr+is:merged",
-            });
-            
             const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
@@ -68,26 +61,21 @@ jobs:
       
             </details>
       
-            #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
       
-            <details><summary>Show Apply</summary>
+            <details><summary>Show Plan</summary>
       
             \`\`\`\n
-            ${process.env.APPLY}
+            ${process.env.PLAN}
             \`\`\`
       
             </details>
       
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-            
+      
             github.rest.issues.createComment({
-              issue_number: relatedPR.data.items[0].number,
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
-            })
-
-            await core.summary
-            .addRaw('See results at ')
-            .addLink('this PR.', relatedPR.data.items[0].html_url)
-            .write()
+            }) 
